@@ -68,70 +68,82 @@ complex_data_list_contacts = []
 complex_data_list_distances = []
 complex_data_list_plddt = []
 
-target_csv = "/edward-slow-vol/CPSC_552/immunoai/data/immuno_data_train_IEDB_A0201_HLAseq_2_csv.csv"
+HLA = "/edward-slow-vol/CPSC_552/immunoai/data/HLA_27_seqs.txt"
+pep = "/edward-slow-vol/CPSC_552/immunoai/data/immuno_data_multi_allele_for_Edward.txt"
 
+HLA_processed = {}
+with open(HLA, 'r') as f:
+    for count, line in enumerate(f):
+        if count == 0:
+            continue 
+        allele, seq = line.strip().split("\t")
+        HLA_processed[allele] = seq
+
+peptides = set()
+with open(pep, 'r') as f:
+    for count, line in enumerate(f):
+        if count == 0:
+            continue 
+        pep, allele, _ = line.strip().split("\t")
+        peptides.add(HLA_processed[allele]+":"+pep)
+
+print(len(peptides))
 # 420 samples per job
 start = int(sys.argv[1])
 end = int(sys.argv[2])
 print("Subsection: " +  str(start) + ": " + str(end) )
 
-with open(target_csv, "r") as f:
-  reader = csv.reader(f)
-  for count, line in enumerate(tqdm(reader)):
-    if count==0:
-      continue
-    count = count - 1
+peptides = list(peptides)
+peptides.sort()
+print(peptides[:3])
 
+for count, line in enumerate(tqdm(peptides)):
     if count<start or count>=end: # skip the samples that aren't part of this job
-      continue 
-
-    peptide = line[0].replace("J", "")
-    sequence = line[1]
-    sequence = sequence + ":" + peptide
-
+        continue 
+    sequence = line
     sequence_length = len(sequence)-1
 
     I = cf_af.prep_inputs(sequence, jobname + sequence[-100:].replace(":", ""), homooligomer, clean=IN_COLAB)
     mod_I = cf_af.prep_msa(I, msa_method, add_custom_msa, msa_format,
-                      pair_mode, pair_cov, pair_qid, TMP_DIR="tmp")
+                        pair_mode, pair_cov, pair_qid, TMP_DIR="tmp")
 
     feature_dict = cf_af.prep_feats(mod_I, clean=IN_COLAB)
     Ls_plot = feature_dict["Ls"]
 
     # prep model options
     opt = {"N":len(feature_dict["msa"]),
-          "L":len(feature_dict["residue_index"]),
-          "use_ptm":use_ptm,
-          "use_turbo":use_turbo,
-          "num_relax" : num_relax,
-          "max_recycles": max_recycles,
-          "tol":0.0,
-          "num_ensemble":num_ensemble,
-          "max_msa_clusters":max_msa_clusters,
-          "max_extra_msa":max_extra_msa,
-          "is_training":is_training}
+            "L":len(feature_dict["residue_index"]),
+            "use_ptm":use_ptm,
+            "use_turbo":use_turbo,
+            "num_relax" : num_relax,
+            "max_recycles": max_recycles,
+            "tol":0.0,
+            "num_ensemble":num_ensemble,
+            "max_msa_clusters":max_msa_clusters,
+            "max_extra_msa":max_extra_msa,
+            "is_training":is_training}
 
     if use_turbo:
-      if "runner" in dir():
+        if "runner" in dir():
         # only recompile if options changed
-        runner = cf_af.prep_model_runner(opt, old_runner=runner)
-      else:
-        runner = cf_af.prep_model_runner(opt)
+            runner = cf_af.prep_model_runner(opt, old_runner=runner)
+        else:
+            runner = cf_af.prep_model_runner(opt)
     else:
-      runner = None
+        runner = None
 
     ###########################
     # run alphafold
     ###########################
     outs, model_rank = cf_af.run_alphafold(feature_dict, opt, runner, num_models, num_samples, subsample_msa,
-                                          rank_by=rank_by, show_images=show_images)
+                                            rank_by=rank_by, show_images=show_images)
 
     rank_dfs_pae = [pd.DataFrame(outs[k]["pae"]) for k in model_rank]
     full_rank_df_pae = pd.concat(rank_dfs_pae)
     full_rank_df_pae['feature'] = 'PAE'
     full_rank_df_pae['model'] = ['rank1']*sequence_length # + ['rank2']*sequence_length + ['rank3']*sequence_length
     full_rank_df_pae['peptide'] = mod_I['seqs'][1]
-    
+
     rank_dfs_contacts = [pd.DataFrame(outs[k]["adj"]) for k in model_rank]
     full_rank_df_contacts = pd.concat(rank_dfs_contacts)
     full_rank_df_contacts['feature'] = 'contacts'
@@ -157,25 +169,25 @@ with open(target_csv, "r") as f:
 
     # clear cache by uploading 20 sequences as one dataframe
     if count%20==0 and count!=start:
-      master_df_pae = pd.concat(complex_data_list_pae)
-      master_df_contacts = pd.concat(complex_data_list_contacts)
-      master_df_distances = pd.concat(complex_data_list_distances)
-      master_df_plddt = pd.concat(complex_data_list_plddt)
+        master_df_pae = pd.concat(complex_data_list_pae)
+        master_df_contacts = pd.concat(complex_data_list_contacts)
+        master_df_distances = pd.concat(complex_data_list_distances)
+        master_df_plddt = pd.concat(complex_data_list_plddt)
 
-      master_df = pd.concat([master_df_pae,master_df_contacts,master_df_distances, master_df_plddt])
-      master_df.to_csv("immuno" + str(count) + '.csv')
+        master_df = pd.concat([master_df_pae,master_df_contacts,master_df_distances, master_df_plddt])
+        master_df.to_csv("immuno" + str(count) + '.csv')
 
-      complex_data_list_pae = []
-      complex_data_list_contacts = []
-      complex_data_list_distances = []
-      complex_data_list_plddt = []
+        complex_data_list_pae = []
+        complex_data_list_contacts = []
+        complex_data_list_distances = []
+        complex_data_list_plddt = []
 
     print('next_complex')
 
-  master_df_pae = pd.concat(complex_data_list_pae)
-  master_df_contacts = pd.concat(complex_data_list_contacts)
-  master_df_distances = pd.concat(complex_data_list_distances)
-  master_df_plddt = pd.concat(complex_data_list_plddt)
+master_df_pae = pd.concat(complex_data_list_pae)
+master_df_contacts = pd.concat(complex_data_list_contacts)
+master_df_distances = pd.concat(complex_data_list_distances)
+master_df_plddt = pd.concat(complex_data_list_plddt)
 
-  master_df = pd.concat([master_df_pae,master_df_contacts,master_df_distances, master_df_plddt])
-  master_df.to_csv("immuno" + str(end) + '.csv')
+master_df = pd.concat([master_df_pae,master_df_contacts,master_df_distances, master_df_plddt])
+master_df.to_csv("immuno" + str(end) + '.csv')

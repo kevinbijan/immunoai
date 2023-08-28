@@ -2,12 +2,13 @@ import pickle
 import os 
 import csv
 import subprocess
+from tqdm import tqdm
 
 rootdir = '/edward-slow-vol/CPSC_552' # /prediction_Immunogenicity_080f2/msa.pickle
 
-target_csv = "/edward-slow-vol/CPSC_552/immunoai/data/immuno_data_train_IEDB_A0201_HLAseq_2_csv.csv"
+target_csv = "/edward-slow-vol/CPSC_552/immunoai/data/immuno_data_test_IEDB_A0201_HLAseq_2_csv.csv"
 
-target_folder = '/edward-slow-vol/CPSC_552/alpha_structure'
+target_folder = '/edward-slow-vol/CPSC_552/alpha_structure_test'
 
 folds = set()
 with open(target_csv, "r") as f:
@@ -21,9 +22,10 @@ with open(target_csv, "r") as f:
     folds.add(sequence)
 
 mapping = {}
+checked = set()
 directories = os.walk(rootdir)
-for d in directories:
-    if "prediction_Immunogenicity" in d[0]:
+for d in tqdm(directories):
+    if "prediction_Immuno" in d[0]:
         if "msa.pickle" not in d[2]:
             print(d[0])
             continue
@@ -41,8 +43,9 @@ for d in directories:
             bashCommand = "cp " + d[0] + "/rank_2_model_1_ptm_seed_0_unrelaxed.pdb " + target_folder + "/rank_2_" + shortname + ".pdb"
             process = subprocess.run(bashCommand.split(" ")) 
             mapping[fold] = shortname
+            checked.add(fold)
 
 with open(target_folder + '/mapping.pickle', 'wb') as handle:
     pickle.dump(mapping, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-print(mapping)
+print(folds.difference(checked))
+# print(mapping)
