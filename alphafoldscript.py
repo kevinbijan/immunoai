@@ -20,7 +20,7 @@ else:
   print('Running on GPU')
   DEVICE = "gpu"
   # disable GPU on tensorflow
-  tf.config.set_visible_devices([], 'GPU')
+  # tf.config.set_visible_devices([], 'GPU')
 
 if 'alphafold' not in sys.path:
   sys.path.append('alphafold')
@@ -28,7 +28,7 @@ if 'ColabFold/beta' not in sys.path:
   sys.path.append('ColabFold/beta')
 
 import colabfold as cf
-import colabfold_alphafold as cf_af
+import ColabFold.beta.colabfold_alphafold as cf_af
 
 if f"tmp/bin" not in os.environ['PATH']:
   os.environ['PATH'] += f":tmp/bin:tmp/scripts"
@@ -68,7 +68,7 @@ complex_data_list_contacts = []
 complex_data_list_distances = []
 complex_data_list_plddt = []
 
-target_csv = "/edward-slow-vol/CPSC_552/immunoai/data/immuno_data_train_IEDB_A0201_HLAseq_2_csv.csv"
+target_csv = "D:\\Edward\\YALE\\CPSC\\552\\immunoai\\data\\CEDAR_for_edward_80_with_file.csv"
 
 # 420 samples per job
 start = int(sys.argv[1])
@@ -82,11 +82,11 @@ with open(target_csv, "r") as f:
       continue
     count = count - 1
 
-    if count<start or count>=end: # skip the samples that aren't part of this job
+    if count<start or count>end: # skip the samples that aren't part of this job
       continue 
 
-    peptide = line[0].replace("J", "")
-    sequence = line[1]
+    peptide = line[1] # line[2] for mut_pep
+    sequence = line[4]
     sequence = sequence + ":" + peptide
 
     sequence_length = len(sequence)-1
@@ -116,7 +116,8 @@ with open(target_csv, "r") as f:
         # only recompile if options changed
         runner = cf_af.prep_model_runner(opt, old_runner=runner)
       else:
-        runner = cf_af.prep_model_runner(opt)
+        runner = cf_af.prep_model_runner(opt, params_loc='D:\\Edward\\YALE\\CPSC\\552\\immunoai\\alphafold\\alphafold\\data')
+
     else:
       runner = None
 
@@ -124,7 +125,8 @@ with open(target_csv, "r") as f:
     # run alphafold
     ###########################
     outs, model_rank = cf_af.run_alphafold(feature_dict, opt, runner, num_models, num_samples, subsample_msa,
-                                          rank_by=rank_by, show_images=show_images)
+                                          rank_by=rank_by, show_images=show_images, 
+                                          params_loc='D:\\Edward\\YALE\\CPSC\\552\\immunoai\\alphafold\\alphafold\\data')
 
     rank_dfs_pae = [pd.DataFrame(outs[k]["pae"]) for k in model_rank]
     full_rank_df_pae = pd.concat(rank_dfs_pae)
@@ -169,6 +171,12 @@ with open(target_csv, "r") as f:
       complex_data_list_contacts = []
       complex_data_list_distances = []
       complex_data_list_plddt = []
+
+      # clear variables as well
+      master_df_pae = []
+      master_df_contacts = []
+      master_df_distances = []
+      master_df_plddt = []
 
     print('next_complex')
 
