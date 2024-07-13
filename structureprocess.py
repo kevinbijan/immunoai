@@ -6,9 +6,9 @@ from tqdm import tqdm
 
 rootdir = 'D:\\Edward\\YALE\\CPSC\\552\\immunoai' # \\prediction_Immunogenicity_080f2\\msa.pickle
 
-target_csv = "D:\\Edward\\YALE\\CPSC\\552\\immunoai\\data\\CEDAR_for_edward_80_with_file.csv"
+target_csv = "D:\\Edward\\YALE\\CPSC\\552\\immunoai\\data\\hadrup_viral_data_csv.csv"
 
-target_folder = 'D:\\Edward\\YALE\\CPSC\\552\\predictions_1'
+target_folder = 'D:\\Edward\\YALE\\CPSC\\552\\predictions_3'
 
 folds = set()
 with open(target_csv, "r") as f:
@@ -17,7 +17,7 @@ with open(target_csv, "r") as f:
     if count==0:
       continue
     peptide = line[1] # line[2] for mut_pep
-    sequence = line[4]
+    sequence = line[3]
     sequence = sequence + peptide
     if sequence in folds: 
        print(sequence)
