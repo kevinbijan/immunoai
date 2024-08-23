@@ -68,7 +68,7 @@ complex_data_list_contacts = []
 complex_data_list_distances = []
 complex_data_list_plddt = []
 
-target_csv = "D:\\Edward\\YALE\\CPSC\\552\\immunoai\\data\\hadrup_viral_data_csv.csv"
+target_csv = "D:\\Edward\\YALE\\CPSC\\552\\immunoai\\data\\hadrup_cancer_df_29K_csv.csv"
 
 # 420 samples per job
 start = int(sys.argv[1])
@@ -85,8 +85,11 @@ with open(target_csv, "r") as f:
     if count<start or count>end: # skip the samples that aren't part of this job
       continue 
 
-    peptide = line[1] # line[2] for mut_pep
-    sequence = line[3]
+    if int(line[5]) not in [0, 1]: # immunogenicity check
+      continue
+
+    peptide = line[0] # line[2] for mut_pep
+    sequence = line[4]
     sequence = sequence + ":" + peptide
 
     sequence_length = len(sequence)-1
