@@ -2,7 +2,7 @@
 
 ## Why Multi-Property Optimization?
 
-Multi-property optimization is a key challenge in small-molecule drug design. Molecules often need to balance conflicting properties to achieve therapeutic efficacy and safety. For example, optimizing molecular solubility (logP) while improving drug-likeness (QED) requires fine-tuning chemical structures without compromising other attributes. The Ascent Bio API enables this precision, offering computational tools to guide molecular design across multiple properties.
+Multi-property optimization is a key challenge in small-molecule drug design. Molecules often need to balance conflicting properties to achieve therapeutic efficacy and safety. For example, optimizing molecular solubility (logP) while improving drug-likeness (QED) requires fine-tuning chemical structures without compromising other attributes. The Ascent Bio API enables this precision, offering way to perform molecular design across multiple properties.
 
 ---
 
