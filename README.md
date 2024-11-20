@@ -13,7 +13,7 @@ Topological Polar Surface Area (TPSA) measures the polar surface area of a molec
 
 ### Step 1: Define Your Starting Molecule
 
-Start by identifying your molecule using its SMILES notation, e.g., `"CC(=O)OC1=CC=CC=C1C(=O)O"`. This molecule serves as input to the API for TPSA optimization. Knowing the baseline TPSA value can help set realistic goals for adjustment.
+Start by identifying your molecule using its SMILES notation, e.g., `"CC(=O)OC1=CC=CC=C1C(=O)O"`. This molecule (acetylsalicylic acid, below) serves as input to the API for TPSA optimization. Knowing the baseline TPSA value can help set realistic goals for adjustment.
 
 ---
 
