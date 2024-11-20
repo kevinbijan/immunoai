@@ -1,9 +1,3 @@
-# immunoai
-Improving the Representation, Interpretability, and Prediction of Cancer Neoantigen Immunogenicity.
-
-
-Predicting immunogenicity from the neoantigen protein sequences presents an interesting but challenging therapeutic opportunity across a variety of cancer types. Cancer cells express MHC-I proteins bound to short ~9-12 amino acid peptides on their surface. These complexes serve as CD8+ T-cell targets, and as such, the neoantigen peptides can be used to prime the immune system and elicit a tumor-specific response, while sparing potential toxicity to normal cells and healthy tissue. However, a current challenge exists when predicting whether or not a presented neoantigen will elicit an immunogenic response, as only a small fraction of presented peptides may be immunogenic. In addition, interpreting the physicochemical properties that are responsible for this immunogenicity also remains difficult. Moreover, given the clinical administration of neoantigen cancer vaccines is often restricted to allow only a subset of mutations for encapsulated neoantigen delivery (e.g., ~20-35 mutations), selection/ranking of mutations that are most likely to elicit a tumor-specific immunogenic response is of critical importance when designing cancer vaccines from a patient’s mutations. With the relative scarcity of data available for cancer immunogenicity across different HLA proteins, predicting this property from protein sequences across patients with different HLA alleles serves as an important property prediction task.
-
 
 # Optimizing TPSA with the Ascent Bio API
 
@@ -64,4 +58,5 @@ This code sends a POST request to the Ascent Bio API endpoint with your molecule
 
 ### Interpreting the Results
 Upon receiving the API response, review the optimized SMILES string and the reported TPSA value. If the TPSA has increased (or decreased) as specified, you can then assess whether this adjustment meets your design goals. For example, if your goal was to increase TPSA to enhance solubility, a significant increase should improve the compound’s interaction in aqueous environments. Alternatively, if you needed lower TPSA for enhanced membrane permeability, a reduction would signal that the molecule may now be more effective at crossing cell membranes or the blood-brain barrier.
+
 This iterative process, powered by the Ascent Bio API, was designed to fine-tune TPSA and other properties efficiently, using the API’s robust search capability within an expansive chemical space. By optimizing TPSA, you can tailor your molecule’s properties to specific physiological and pharmacological needs, potentially enhancing therapeutic efficacy and safety profiles.
