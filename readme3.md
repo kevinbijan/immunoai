@@ -1,38 +1,29 @@
-# Multi-Property Optimization with the Ascent Bio API
+# Data Augmentation using Datagen
 
-## Why Multi-Property Optimization?
+## Why use Datagen?
 
-Multi-property optimization is a key challenge in small-molecule drug design. Molecules often need to balance conflicting properties to achieve therapeutic efficacy and safety. For example, optimizing molecular solubility (logP) while improving drug-likeness (QED) requires fine-tuning chemical structures without compromising other attributes. The Ascent Bio API enables this precision, offering way to perform molecular design across multiple properties.
+The Datagen tool is a component of the Ascent Bio API useful for exploring and expanding chemical space around a given molecule or set of molecules. Whether you’re performing a virtual screen, preparing for an experimental assay, or generating training data for machine learning models, Datagen enables you to create a diverse library of molecules for downstream small-molecule design goals. By generating molecular variants that share structural similarities with your input molecule (e.g., share a common chemical scaffold), Datagen provides a rich dataset for screening or training purposes while ensuring chemical diversity and relevance.
 
----
+Datagen works by leveraging an internal framework that integrates chemical space together to better explore the structure-property relationships. The tool analyzes the structural features of a molecule and systematically generates chemically meaningful modifications, such as adding, substituting, or removing functional groups. These changes are designed to explore adn examine areas of chemical space around a molecule of interest. In addition it can be used to generate molecules in effort to retain drug-like properties while introducing diversity or searchign for candidates with tuned properties. Whether for virtual screening to identify hits or creating data for model pre-training, Datagen provides a fast and easy way to effectively leverage learned chemical strucutre-property patterns.
 
-## Goal: Decrease logP and Increase QED
-
-Lowering logP (partition coefficient) improves a molecule's solubility and reduces lipophilicity, which can lead to better bioavailability. Increasing QED (quantitative estimate of drug-likeness) ensures the molecule maintains favorable characteristics for drug development. Together, these modifications can enhance pharmacological performance while addressing solubility and drug-likeness constraints.
+Here’s a step-by-step guide to using Datagen to expand chemical space around a molecule:
 
 ---
 
-## Step-by-Step Guide: Using the Ascent Bio API
+## Step 1: Define the Input Molecule
+The first step is to select the molecule you want to use as the starting point for chemical space expansion, by providing its SMILES string. For instance, if your input molecule is "CC(=O)OC1=CC=CC=C1C(=O)O", this will serve as the seed structure. Datagen will generate a library of molecules based on this starting point, applying systematic modifications while giving you the control to determine how many molecules to be generated and how far into chemical space to reach. 
 
-### Step 1: Define Your Starting Molecule
 
-Start by identifying your molecule using its SMILES notation, e.g., `"CC(=O)OC1=CC=CC=C1C(=O)O"`. This molecule serves as input to the API for multi-property optimization. 
+You can control key aspects of the expansion, such as:
 
----
+Scaffold: Specify a substructure or scaffold to ensure generated molecules retain key functional groups.
 
-### Step 2: Specify Two Properties Simultaneously as the Target Properties.
+Number of Molecules: Define the number of variants (num_outputs) you want to generate.
 
-Configure the API request to optimize both properties simultaneously:
-
-For example:
-- To enhance druglikeness, increase QED.
-- For better solubility, decrease LogP.
-
-These settings guide the API to explore viable structural variations that align with drug-like properties.
 
 ---
 
-### Step 3: Send the Request and Analyze Results
+## Step 2: Send the Request and Analyze Results
 
 
 Here’s an example API request:
@@ -41,22 +32,30 @@ Here’s an example API request:
 python
 import requests
 
-url = "https://api.ascentbio.xyz/v1/design"
+url = "[https://api.ascentbio.xyz/v1/design](https://ascentbio--ab-datagen-v1-inference.modal.run/generate)"
 headers = {
     "Content-Type": "application/json",
     "ascent-api-key": "<your-api-key>"
 }
 data = {
     "smiles": "CC(=O)OC1=CC=CC=C1C(=O)O",
-    "changes": {"MolLogP": "decrease", 
-               "qed": "increase"}
+	 "scaffold": "CCCC",
+	 "num_outputs": "100"
 }
 
+
+response = requests.post(url, json=data, headers=headers)
+molecule_library = response.json()
+print(molecule_library)
+
 ```
+---
+
+## Step 3: Analyze the Results
+
+The API response will return a JSON object containing a list of generated molecules - in this case 100 molecules were generated that were similar to the seed input molecule and (optionally) retained the scaffold of that same original molecule. Each output molecule is represented by its SMILES string and may include calculated properties, such as molecular weight, logP, and TPSA. These properties can help you evaluate the generated molecules for your specific application. 
 
 This code sends a POST request to the Ascent Bio API endpoint with your molecule’s SMILES string, optimization parameters, and your API key. The response will contain a modified SMILES string and updated property values for the molecule, showing how its TPSA has been adjusted.
 
-### Interpreting the Results
-Upon receiving the API response, review the optimized SMILES string and the reported property values.Evaluate the output to verify whether (1) logP has decreased and (2) QED has increased: Reflects enhanced drug-likeness and overall suitability for therapeutic use. For example, a molecule with decreased logP and increased QED is more likely to exhibit favorable solubility while maintaining or improving its efficacy as a drug candidate.
-
-Together, this multi-property approach enables a controlled optimization of two properties of interest in parallel. 
+### Step 4: Iterate and Refine
+Ultimately, Datagen allows for iterative chemical space exploration and subsetting to a particular region of chemical space of interest. If the initial library doesn’t fully meet your needs, you can modify parameters such as the scaffold, diversity, or input molecule and generate a new library within seconds. This iterative approach ensures you can thoroughly explore relevant chemical space for your application, leading to better results in virtual screening, experimental campaigns, or model training.
